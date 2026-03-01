@@ -284,6 +284,9 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     # 3. Regras Lógicas
     # -- Regras baseadas em observações empíricas e intuição sobre o comportamento de textos humanos vs IA --
     
+    # Regra 0 (Precedência de Z-Score): Se o Z-Score for muito alto, é quase certamente IA, devido à natureza estatística do DetectGPT.
+    rule0 = ctrl.Rule(z_score['high'], probability['high'])
+    
     # Regra 1: Padrão clássico de IA (Z-Score alto, Burstiness baixo e Taxa de Erros baixa).
     rule1 = ctrl.Rule(z_score['high'] & burstiness['low'] & error_rate['low'], probability['high'])
     
@@ -306,7 +309,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     rule7 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
 
     # 4. Simulação
-    control_sys = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7])
+    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7])
     simulation = ctrl.ControlSystemSimulation(control_sys)
 
     # Clipping de segurança para garantir que os valores entrem no universo definido
