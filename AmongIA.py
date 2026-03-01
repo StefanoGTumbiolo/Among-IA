@@ -4,12 +4,12 @@ import re
 import numpy as np
 import random
 import os
-import numpy as np
 from tqdm import tqdm
 import language_tool_python
 from sentence_transformers import SentenceTransformer, util
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+from pathlib import Path
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -377,46 +377,94 @@ def classify_text_file(file_path, models, config, language_tool, sentence_model)
     except Exception as e:
         print(f"\n[AVISO] Falha ao processar a lógica Fuzzy: {e}")
         probabilidade_final = 50.0
-
-    # --- EXIBIÇÃO DO PAINEL DE RESULTADOS ---
-    print("\n" + "="*55)
-    print("                  LAUDO FINAL AMONGIA                  ")
-    print("="*55)
-    print("MÉTRICAS ISOLADAS:")
-    print(f" -> 1. Z-Score (DetectGPT) : {score_ia:.4f}")
-    print(f" -> 2. Burstiness (Ritmo)  : {score_burstiness:.4f}")
-    print(f" -> 3. Erros (por 100 palavras): {score_erros:.2f}")
-    print(f" -> 4. Coesão Semântica    : {score_coesao:.4f}")
-    print("-" * 55)
     
-    print(f"VEREDITO FUZZY: {probabilidade_final:.1f}% de chance de ser IA.")
-    
+    # Classificação final baseada na probabilidade calculada pela lógica Fuzzy
     if probabilidade_final <= 35.0:
-        print("CLASSIFICAÇÃO FINAL: Texto muito provavelmente escrito por humano. 👤")
+        classificacao = "Texto muito provavelmente escrito por humano. 👤"
     elif probabilidade_final > 35.0 and probabilidade_final <= 50.0:
-        print("CLASSIFICAÇÃO FINAL: texto provavelmente gerado por humano, mas com características de IA. 👤🤖")
+        classificacao = "Texto provavelmente gerado por humano, mas com características de IA. 👤🤖"
     elif probabilidade_final > 50.0 and probabilidade_final <= 70.0:
-        print("CLASSIFICAÇÃO FINAL: texto provavelmente gerado por IA, mas com características humanas. 🤖👤")
+        classificacao = "Texto provavelmente gerado por IA, mas com características humanas. 🤖👤"
     elif probabilidade_final > 70.0:
-        print("CLASSIFICAÇÃO FINAL: Texto muito provavelmente gerado por IA. 🤖")
-        
+        classificacao = "Texto muito provavelmente gerado por IA. 🤖"
+    
+    # --- EXIBIÇÃO E EXPORTAÇÃO DO PAINEL DE RESULTADOS ---
+    laudo = f"""
+    {"="*55}
+                      LAUDO FINAL AMONGIA                  
+    {"="*55}
+    ARQUIVO: {os.path.basename(file_path)}
+    {"="*55}
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : {score_ia:.4f}
+    - Burstiness (Ritmo)  : {score_burstiness:.4f}
+    - Erros (por 100 pal.): {score_erros:.2f}
+    - Coesão Semântica    : {score_coesao:.4f}
+    {"="*55}
+    VEREDITO FUZZY: {probabilidade_final:.1f}% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: {classificacao}
+    {"="*55}
+    """
+    
+    print(f"\n{laudo}\n")
+    
+    # Salva o resultado em um arquivo de texto para análise
+    base_name = os.path.splitext(file_path)[0]
+    output_file = f"{base_name}Result.txt"
+    
+    try:
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(laudo)
+        print(f"[SUCESSO] Laudo salvo em: {output_file}\n")
+    except Exception as e:
+        print(f"\n[AVISO] Não foi possível salvar o arquivo de laudo: {e}\n")
+
+def process_directory(directory_path, models, config, language_tool, sentence_model):
+    """Processa todos os arquivos .txt em um diretório e gera laudos individuais para cada um."""
+    path = Path(directory_path)
+    txt_files = [f for f in path.rglob ("*.txt") if not f.name.endswith("Result.txt")]
+                     
+    if not txt_files:
+        print(f"\n[AVISO] Nenhum arquivo .txt encontrado no diretório: {directory_path}\n")
+        return
+    
+    print(f"\n[INÍCIO] Processando {len(txt_files)} arquivos no diretório: {directory_path}\n")
+    
+    for txt_file in txt_files:
+        print(f"Lendo arquivo: {txt_file.name}")
+        classify_text_file(str(txt_file), models, config, language_tool, sentence_model)
+    
 def main():
     setup_logging() 
     validate_environment()
+    
+    # Travamento da seed para evitar variação entre execuções
+    random.seed(42)
+    np.random.seed(42)
+    torch.manual_seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
 
     print("\n[INICIALIZAÇÃO 1/2] Carregando modelos de linguagem (Gerador e Perturbação)...")
     models = (
         *load_generator_model(CONFIG["GENERATOR_MODEL_ID"]),
         *load_perturbation_model(CONFIG["PERTURBATION_MODEL_ID"])
     )
-
+    
     print("[INICIALIZAÇÃO 2/2] Carregando ferramentas de análise (LanguageTool e SentenceTransformer)...")
     language_tool = language_tool_python.LanguageTool('pt-BR')
-    sentence_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-
-    file_path = "texto_avaliado.txt"  
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    sentence_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device=device)
     
-    classify_text_file(file_path, models, CONFIG, language_tool, sentence_model)
+    text_folder = "textos_analise"  
+    
+    # Se a pasta não existir, criamos ela
+    if not os.path.exists(text_folder):
+        os.makedirs(text_folder)
+        print(f"\n[AVISO] O diretório '{text_folder}' não existia e foi criado. Por favor, adicione os arquivos .txt para análise e execute novamente.\n")
+        return
+    else:
+        process_directory(text_folder, models, CONFIG, language_tool, sentence_model)
     
     language_tool.close()
     
