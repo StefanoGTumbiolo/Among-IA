@@ -244,6 +244,11 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     """
     Sistema de Inferência Fuzzy corrigido para evitar erros de atributo e limites.
     """
+    
+    # REGRA ESPECIALISTA: Se o modelo detecta uma anomalia muito alta no Z-Score (>3.8) isso é um indicador quase certo de IA, independentemente das outras métricas. Essa regra tem precedência máxima.
+    if score_z > 3.8:
+        return 100.0
+    
     # 1. Definição do Universo (Antecedents e Consequent)
     # Entradas
     z_score = ctrl.Antecedent(np.arange(0, 7.1, 0.1), 'z_score')
@@ -284,35 +289,22 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     # 3. Regras Lógicas
     # -- Regras baseadas em observações empíricas e intuição sobre o comportamento de textos humanos vs IA --
     
-    # Regra 0 (Precedência de Z-Score): Se o Z-Score for muito alto, é quase certamente IA, devido à natureza estatística do DetectGPT.
+    # 3. Regras Lógicas
     rule0 = ctrl.Rule(z_score['high'], probability['high'])
-    
-    # Regra 1: Padrão clássico de IA (Z-Score alto, Burstiness baixo e Taxa de Erros baixa).
     rule1 = ctrl.Rule(z_score['high'] & burstiness['low'] & error_rate['low'], probability['high'])
-    
-    # Regra 2: IA não detectada pelo Z-Score, mas com Burstiness baixa e Coesão alta.
     rule2 = ctrl.Rule(z_score['medium'] & burstiness['low'] & cohesion['high'], probability['high'])
-    
-    # Regra 3: Assinatura humana: Burstiness alta quase sempre indica texto humano.
     rule3 = ctrl.Rule(burstiness['high'], probability['low'])
-    
-    # Regra 4: Outra assinatura humana: Taxa de Erros alta ou Coesão baixa indicam texto humano.
     rule4 = ctrl.Rule(error_rate['high'] | cohesion['low'], probability['low'])
-    
-    # Regra 5: Caso intermediário (humano formal/acadêmico) - Z-Score humano, mas coesão alta Burstiness média.
     rule5 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], probability['medium'])
-    
-    # Regra 6: Zona cinzenta (Z-Score alto, mas com Burstiness alta): possível IA editada por humano ou texto humano com revisão de IA.
     rule6 = ctrl.Rule(z_score['high'] & burstiness['high'], probability['medium'])
-    
-    # Regra 7: Caso genérico onde não é possível definir claramente (tudo é médio).
     rule7 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
+    rule8 = ctrl.Rule(z_score['low'], probability['low'])
+    rule9 = ctrl.Rule(z_score['medium'], probability['medium'])
 
-    # 4. Simulação
-    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7])
+    # 4. Simulação 
+    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9])
     simulation = ctrl.ControlSystemSimulation(control_sys)
 
-    # Clipping de segurança para garantir que os valores entrem no universo definido
     simulation.input['z_score'] = np.clip(score_z, 0, 7.0)
     simulation.input['burstiness'] = np.clip(score_burstiness, 0, 25.0)
     simulation.input['error_rate'] = np.clip(score_error_rate, 0, 5.0)
