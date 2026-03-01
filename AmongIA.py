@@ -300,10 +300,11 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     rule8 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], probability['medium'])
     rule9 = ctrl.Rule(z_score['high'] & burstiness['high'], probability['medium'])
     rule10 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
+    rule11 = ctrl.Rule(burstiness['low'] & error_rate['low'], probability['high'])
 
 
     # 4. Simulação 
-    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10])
+    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11])
     simulation = ctrl.ControlSystemSimulation(control_sys)
 
     simulation.input['z_score'] = np.clip(score_z, 0, 7.0)
