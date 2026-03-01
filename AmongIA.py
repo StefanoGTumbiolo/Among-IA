@@ -247,7 +247,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     
     # REGRA ESPECIALISTA: Se o modelo aponta um valor extremamente alto no Z-Score (>3.8) isso é um indicador certo de IA, devido a natureza do DetectGPT. Essa regra tem precedência máxima.
     if score_z > 3.8:
-        return 100.0
+        return 95.0
     
     # 1. Definição do Universo (Antecedents e Consequent)
     # Entradas
