@@ -258,8 +258,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     # Saída
     probability = ctrl.Consequent(np.arange(0, 101, 1), 'probability')
 
-    # 2. Funções de Pertinência 
-    
+    # 2. Funções de Pertinência
     # Entradas: Z-Score, Burstiness, Taxa de Erros e Coesão Semântica
     # Z-Score
     z_score['low'] = fuzz.trapmf(z_score.universe, [0, 0, 2.2, 2.5])
@@ -291,18 +290,20 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     
     # 3. Regras Lógicas
     rule0 = ctrl.Rule(z_score['high'], probability['high'])
-    rule1 = ctrl.Rule(z_score['high'] & burstiness['low'] & error_rate['low'], probability['high'])
-    rule2 = ctrl.Rule(z_score['medium'] & burstiness['low'] & cohesion['high'], probability['high'])
-    rule3 = ctrl.Rule(burstiness['high'], probability['low'])
-    rule4 = ctrl.Rule(error_rate['high'] | cohesion['low'], probability['low'])
-    rule5 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], probability['medium'])
-    rule6 = ctrl.Rule(z_score['high'] & burstiness['high'], probability['medium'])
-    rule7 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
-    rule8 = ctrl.Rule(z_score['low'], probability['low'])
-    rule9 = ctrl.Rule(z_score['medium'], probability['medium'])
+    rule1 = ctrl.Rule(z_score['medium'], probability['medium'])
+    rule2 = ctrl.Rule(z_score['low'], probability['low'])
+    rule3 = ctrl.Rule(z_score['high'] & burstiness['low'], probability['high'])
+    rule4 = ctrl.Rule(z_score['medium'] & burstiness['low'] & cohesion['high'], probability['high'])
+    rule5 = ctrl.Rule(burstiness['high'], probability['low'])
+    rule6 = ctrl.Rule(error_rate['high'] & cohesion['low'], probability['low'])
+    rule7 = ctrl.Rule(z_score['low'] & burstiness['high'] & error_rate['high'], probability['low'])
+    rule8 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], probability['medium'])
+    rule9 = ctrl.Rule(z_score['high'] & burstiness['high'], probability['medium'])
+    rule10 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
+
 
     # 4. Simulação 
-    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9])
+    control_sys = ctrl.ControlSystem([rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10])
     simulation = ctrl.ControlSystemSimulation(control_sys)
 
     simulation.input['z_score'] = np.clip(score_z, 0, 7.0)
