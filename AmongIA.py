@@ -245,7 +245,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     Sistema de Inferência Fuzzy corrigido para evitar erros de atributo e limites.
     """
     
-    # REGRA ESPECIALISTA: Se o modelo detecta uma anomalia muito alta no Z-Score (>3.8) isso é um indicador quase certo de IA, independentemente das outras métricas. Essa regra tem precedência máxima.
+    # REGRA ESPECIALISTA: Se o modelo aponta um valor extremamente alto no Z-Score (>3.8) isso é um indicador certo de IA, devido a natureza do DetectGPT. Essa regra tem precedência máxima.
     if score_z > 3.8:
         return 100.0
     
