@@ -1,0 +1,16 @@
+
+    =======================================================
+                      LAUDO FINAL AMONGIA                  
+    =======================================================
+    ARQUIVO: ChatGptImpactoIA.txt
+    =======================================================
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : 3.1751
+    - Burstiness (Ritmo)  : 6.3998
+    - Erros (por 100 pal.): 0.76
+    - Coesão Semântica    : 0.4051
+    =======================================================
+    VEREDITO FUZZY: 80.5% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: Texto muito provavelmente gerado por IA. 🤖
+    =======================================================
+    

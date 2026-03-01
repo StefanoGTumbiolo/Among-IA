@@ -1,0 +1,16 @@
+
+    =======================================================
+                      LAUDO FINAL AMONGIA                  
+    =======================================================
+    ARQUIVO: CommentReddit.txt
+    =======================================================
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : 2.4532
+    - Burstiness (Ritmo)  : 15.1683
+    - Erros (por 100 pal.): 5.11
+    - Coesão Semântica    : 0.3500
+    =======================================================
+    VEREDITO FUZZY: 19.0% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: Texto muito provavelmente escrito por humano. 👤
+    =======================================================
+    

@@ -1,0 +1,16 @@
+
+    =======================================================
+                      LAUDO FINAL AMONGIA                  
+    =======================================================
+    ARQUIVO: ChatGptRedacaoENEM.txt
+    =======================================================
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : 2.4824
+    - Burstiness (Ritmo)  : 9.4544
+    - Erros (por 100 pal.): 0.00
+    - Coesão Semântica    : 0.4471
+    =======================================================
+    VEREDITO FUZZY: 62.5% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: Texto provavelmente gerado por IA, mas com características humanas. 🤖👤
+    =======================================================
+    

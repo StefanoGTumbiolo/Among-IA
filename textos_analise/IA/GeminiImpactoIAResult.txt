@@ -1,0 +1,16 @@
+
+    =======================================================
+                      LAUDO FINAL AMONGIA                  
+    =======================================================
+    ARQUIVO: GeminiImpactoIA.txt
+    =======================================================
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : 3.4362
+    - Burstiness (Ritmo)  : 7.3186
+    - Erros (por 100 pal.): 0.00
+    - Coesão Semântica    : 0.3777
+    =======================================================
+    VEREDITO FUZZY: 82.0% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: Texto muito provavelmente gerado por IA. 🤖
+    =======================================================
+    

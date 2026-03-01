@@ -1,1 +1,0 @@
-Coloque os textos a serem testados nessa pasta (arquivo .txt)

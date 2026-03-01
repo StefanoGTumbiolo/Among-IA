@@ -1,0 +1,16 @@
+
+    =======================================================
+                      LAUDO FINAL AMONGIA                  
+    =======================================================
+    ARQUIVO: PortalUfcg.txt
+    =======================================================
+    MÉTRICAS ISOLADAS:
+    - Z-Score (DetectGPT) : 1.3556
+    - Burstiness (Ritmo)  : 13.8708
+    - Erros (por 100 pal.): 2.73
+    - Coesão Semântica    : 0.3735
+    =======================================================
+    VEREDITO FUZZY: 19.0% de chance de ser IA.
+    CLASSIFICAÇÃO FINAL: Texto muito provavelmente escrito por humano. 👤
+    =======================================================
+    

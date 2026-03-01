@@ -437,13 +437,6 @@ def process_directory(directory_path, models, config, language_tool, sentence_mo
 def main():
     setup_logging() 
     validate_environment()
-    
-    # Travamento da seed para evitar variação entre execuções
-    random.seed(42)
-    np.random.seed(42)
-    torch.manual_seed(42)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(42)
 
     print("\n[INICIALIZAÇÃO 1/2] Carregando modelos de linguagem (Gerador e Perturbação)...")
     models = (
