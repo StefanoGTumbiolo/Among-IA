@@ -346,7 +346,7 @@ def classify_text_file(file_path, models, config, language_tool, sentence_model)
         return
     
     print("\n" + "="*55)
-    print(" INICIANDO A ANÁLISE MULTIDIMENSIONAL DO AmongIA ")
+    print(" INICIANDO A ANÁLISE MULTIDIMENSIONAL DO AMONG IA ")
     print("="*55)
     
     # 1. Z-Score / DetectGPT (A matemática original)
@@ -446,7 +446,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     sentence_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device=device)
     
-    text_folder = "textos_analise"  
+    text_folder = "textos"  
     
     # Se a pasta não existir, criamos ela
     if not os.path.exists(text_folder):
