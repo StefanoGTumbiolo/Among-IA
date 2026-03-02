@@ -240,14 +240,14 @@ def _calculate_scores_for_text(text, models, config, debug=False):
     score = (original_log_prob - mean_perturbed) / std_perturbed if std_perturbed > 1e-6 else 0.0
     return score, original_log_prob, mean_perturbed
 
-def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, score_cohesion):
+def calculate_amongia_score_fuzzy(score_z, score_burstiness, score_error_rate, score_cohesion):
     """
     Sistema de Inferência Fuzzy corrigido para evitar erros de atributo e limites.
     """
     
     # REGRA ESPECIALISTA: Se o modelo aponta um valor extremamente alto no Z-Score (>3.8) isso é um indicador certo de IA, devido a natureza do DetectGPT. Essa regra tem precedência máxima.
     if score_z > 3.8:
-        return 95.0
+        return 9.5
     
     # 1. Definição do Universo (Antecedents e Consequent)
     # Entradas
@@ -256,7 +256,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     error_rate = ctrl.Antecedent(np.arange(0, 5.1, 0.1), 'error_rate')
     cohesion = ctrl.Antecedent(np.arange(0, 1.01, 0.01), 'cohesion')
     # Saída
-    probability = ctrl.Consequent(np.arange(0, 101, 1), 'probability')
+    amongia_score = ctrl.Consequent(np.arange(0, 10.1, 0.1), 'amongia_score')
 
     # 2. Funções de Pertinência
     # Entradas: Z-Score, Burstiness, Taxa de Erros e Coesão Semântica
@@ -280,27 +280,27 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     cohesion['medium'] = fuzz.trimf(cohesion.universe, [0.33, 0.39, 0.45])
     cohesion['high'] = fuzz.trapmf(cohesion.universe, [0.42, 0.48, 1.0, 1.0])
     
-    # Saída: Probabilidade de ser IA
-    probability['low'] = fuzz.trapmf(probability.universe, [0, 0, 30, 45])
-    probability['medium'] = fuzz.trimf(probability.universe, [35, 50, 65])
-    probability['high'] = fuzz.trapmf(probability.universe, [55, 75, 100, 100])
+    # Saída: AmongIA Score (menor = humano, maior = IA)
+    amongia_score['low'] = fuzz.trapmf(amongia_score.universe, [0, 0, 3.0, 4.5])
+    amongia_score['medium'] = fuzz.trimf(amongia_score.universe, [3.5, 5.0, 6.5])
+    amongia_score['high'] = fuzz.trapmf(amongia_score.universe, [5.5, 7.5, 10.0, 10.0])
 
     # 3. Regras Lógicas
     # -- Regras baseadas em observações empíricas e intuição sobre o comportamento de textos humanos vs IA --
     
     # 3. Regras Lógicas
-    rule0 = ctrl.Rule(z_score['high'], probability['high'])
-    rule1 = ctrl.Rule(z_score['medium'], probability['medium'])
-    rule2 = ctrl.Rule(z_score['low'], probability['low'])
-    rule3 = ctrl.Rule(z_score['high'] & burstiness['low'], probability['high'])
-    rule4 = ctrl.Rule(z_score['medium'] & (burstiness['low'] | burstiness['medium']) & error_rate['low'], probability['high'])
-    rule5 = ctrl.Rule(burstiness['high'], probability['low'])
-    rule6 = ctrl.Rule(error_rate['high'] & cohesion['low'], probability['low'])
-    rule7 = ctrl.Rule(z_score['low'] & burstiness['high'] & error_rate['high'], probability['low'])
-    rule8 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], probability['medium'])
-    rule9 = ctrl.Rule(z_score['high'] & burstiness['high'], probability['medium'])
-    rule10 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], probability['medium'])
-    rule11 = ctrl.Rule(burstiness['low'] & error_rate['low'], probability['high'])
+    rule0 = ctrl.Rule(z_score['high'], amongia_score['high'])
+    rule1 = ctrl.Rule(z_score['medium'], amongia_score['medium'])
+    rule2 = ctrl.Rule(z_score['low'], amongia_score['low'])
+    rule3 = ctrl.Rule(z_score['high'] & burstiness['low'], amongia_score['high'])
+    rule4 = ctrl.Rule(z_score['medium'] & (burstiness['low'] | burstiness['medium']) & error_rate['low'], amongia_score['high'])
+    rule5 = ctrl.Rule(burstiness['high'], amongia_score['low'])
+    rule6 = ctrl.Rule(error_rate['high'] & cohesion['low'], amongia_score['low'])
+    rule7 = ctrl.Rule(z_score['low'] & burstiness['high'] & error_rate['high'], amongia_score['low'])
+    rule8 = ctrl.Rule(z_score['low'] & cohesion['high'] & burstiness['medium'], amongia_score['medium'])
+    rule9 = ctrl.Rule(z_score['high'] & burstiness['high'], amongia_score['medium'])
+    rule10 = ctrl.Rule(z_score['medium'] & burstiness['medium'] & error_rate['medium'] & cohesion['medium'], amongia_score['medium'])
+    rule11 = ctrl.Rule(burstiness['low'] & error_rate['low'], amongia_score['high'])
 
 
     # 4. Simulação 
@@ -314,7 +314,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
 
     simulation.compute()
     
-    return simulation.output['probability']
+    return simulation.output['amongia_score']
     
 
 def classify_text_file(file_path, models, config, language_tool, sentence_model):
@@ -368,21 +368,21 @@ def classify_text_file(file_path, models, config, language_tool, sentence_model)
     # 5. Lógica Fuzzy
     print("[5/5] Processando lógica Fuzzy (veredito final)...")
     try:
-        probabilidade_final = calculate_probability_fuzzy(
+        amongia_score = calculate_amongia_score_fuzzy(
             score_ia, score_burstiness, score_erros, score_coesao
         )
     except Exception as e:
         print(f"\n[AVISO] Falha ao processar a lógica Fuzzy: {e}")
-        probabilidade_final = 50.0
+        amongia_score = 5.0
     
     # Classificação final baseada na probabilidade calculada pela lógica Fuzzy
-    if probabilidade_final <= 35.0:
+    if amongia_score <= 3.5:
         classificacao = "Texto muito provavelmente escrito por humano. 👤"
-    elif probabilidade_final > 35.0 and probabilidade_final <= 50.0:
+    elif amongia_score > 3.5 and amongia_score <= 5.0:
         classificacao = "Texto provavelmente gerado por humano, mas com características de IA. 👤🤖"
-    elif probabilidade_final > 50.0 and probabilidade_final <= 70.0:
+    elif amongia_score > 5.0 and amongia_score <= 7.0:
         classificacao = "Texto provavelmente gerado por IA, mas com características humanas. 🤖👤"
-    elif probabilidade_final > 70.0:
+    elif amongia_score > 7.0:
         classificacao = "Texto muito provavelmente gerado por IA. 🤖"
     
     # --- EXIBIÇÃO E EXPORTAÇÃO DO PAINEL DE RESULTADOS ---
@@ -398,7 +398,7 @@ def classify_text_file(file_path, models, config, language_tool, sentence_model)
     - Erros (por 100 pal.): {score_erros:.2f}
     - Coesão Semântica    : {score_coesao:.4f}
     {"="*55}
-    VEREDITO FUZZY: {probabilidade_final:.1f}% de chance de ser IA.
+    AMONGIA SCORE: {amongia_score:.1f}/10.0 
     CLASSIFICAÇÃO FINAL: {classificacao}
     {"="*55}
     """
