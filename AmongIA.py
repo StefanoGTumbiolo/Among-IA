@@ -293,7 +293,7 @@ def calculate_probability_fuzzy(score_z, score_burstiness, score_error_rate, sco
     rule1 = ctrl.Rule(z_score['medium'], probability['medium'])
     rule2 = ctrl.Rule(z_score['low'], probability['low'])
     rule3 = ctrl.Rule(z_score['high'] & burstiness['low'], probability['high'])
-    rule4 = ctrl.Rule(z_score['medium'] & burstiness['low'] & cohesion['high'], probability['high'])
+    rule4 = ctrl.Rule(z_score['medium'] & (burstiness['low'] | burstiness['medium']) & error_rate['low'], probability['high'])
     rule5 = ctrl.Rule(burstiness['high'], probability['low'])
     rule6 = ctrl.Rule(error_rate['high'] & cohesion['low'], probability['low'])
     rule7 = ctrl.Rule(z_score['low'] & burstiness['high'] & error_rate['high'], probability['low'])
